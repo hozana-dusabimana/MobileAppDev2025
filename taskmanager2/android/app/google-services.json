@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "971905033685",
+    "project_id": "tutorial-ee980",
+    "storage_bucket": "tutorial-ee980.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:971905033685:android:b611de7f919edd9c94895c",
+        "android_client_info": {
+          "package_name": "com.example.crude"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQ_GGVqj96iQKUmrS9d9K9xkI5dPXOUKw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:971905033685:android:45273d520e9b2a9794895c",
+        "android_client_info": {
+          "package_name": "com.example.taskmanager2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQ_GGVqj96iQKUmrS9d9K9xkI5dPXOUKw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
