@@ -11,33 +11,53 @@ class TaskFormScreen extends StatefulWidget {
 class _TaskFormScreenState extends State<TaskFormScreen> {
   final TextEditingController taskController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  String? taskId;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map && args['name'] != null) {
-      taskController.text = args['name'];
+    if (args is Map && args['title'] != null) {
+      taskController.text = args['title'];
+      taskId = args['id'];
     } else if (args is String) {
       taskController.text = args;
     }
   }
 
-  void _saveTask() {
+  void _saveTask() async {
     if (_formKey.currentState!.validate()) {
       String taskName = taskController.text.trim();
-      Navigator.pop(context, taskName);
-      final query = FirebaseFirestore.instance.collection('tasks').add({
-        'index': Random().nextInt(10000),
-        'title': taskName,
-        'status': 'pending',
-        'createdAt': DateTime.now(),
-        'updatedAt': DateTime.now(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Task saved!')),
-      );
+      if (taskId != null) {
+        // Update existing task
+        await FirebaseFirestore.instance.collection('tasks').doc(taskId).update({
+          'title': taskName,
+          'updatedAt': DateTime.now(),
+        });
+        Navigator.pop(context, {
+          'id': taskId,
+          'title': taskName,
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Task updated!')),
+        );
+      } else {
+        // Add new task
+        final doc = await FirebaseFirestore.instance.collection('tasks').add({
+          'index': Random().nextInt(10000),
+          'title': taskName,
+          'status': 'pending',
+          'createdAt': DateTime.now(),
+          'updatedAt': DateTime.now(),
+        });
+        Navigator.pop(context, {
+          'id': doc.id,
+          'title': taskName,
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Task saved!')),
+        );
+      }
     }
   }
 
@@ -95,7 +115,13 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Text('Save Task', style: TextStyle(fontSize: 16)),
+               child: Text(
+                      'Save Task',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white, // Set the text color here
+                      ),
+                    ),
                 ),
               ],
             ),

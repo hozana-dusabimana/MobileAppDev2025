@@ -41,13 +41,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _navigateToTaskForm({int? index}) async {
     final existingTask = index != null ? tasks[index] : null;
-
     final result = await Navigator.pushNamed(
       context,
       '/task-form',
       arguments: existingTask,
     );
-
     if (result != null && result is Map<String, dynamic>) {
       setState(() {
         if (index != null) {
@@ -56,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
           tasks.add(result);
         }
       });
+      viewTask(); // Refresh from Firestore after add/edit
     }
   }
 
@@ -78,6 +77,44 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       print('Error updating task: $e');
+    }
+  }
+
+  void _deleteTask(int index) async {
+    final taskId = tasks[index]['id'];
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Task'),
+        content: Text('Are you sure you want to delete this task?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      try {
+        await FirebaseFirestore.instance.collection('tasks').doc(taskId).delete();
+        setState(() {
+          tasks.removeAt(index);
+          completedTaskIndices.remove(index);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Task deleted!')),
+        );
+      } catch (e) {
+        print('Error deleting task: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete task.')),
+        );
+      }
     }
   }
 
@@ -147,7 +184,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: isCompleted ? Colors.grey : Colors.black,
                       ),
                     ),
-                    trailing: Icon(Icons.edit, color: Colors.blue),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () => _navigateToTaskForm(index: index),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _deleteTask(index),
+                        ),
+                      ],
+                    ),
                     onTap: () => _navigateToTaskForm(index: index),
                   ),
                 );
